@@ -1,10 +1,12 @@
 import express from 'express';
 import cors from 'cors';
-import { setupDatabase } from './utils/databaseService/connect.js';
 import usersRouter from './api/controllers/users.js';
 import examsRouter from './api/controllers/exams.js';
+import databaseRouter from './api/controllers/database.js';
 import helmet from 'helmet';
 import { config } from 'dotenv';
+import { cleanupExpiredTokens } from './utils/utils.js';
+import schedule from 'node-schedule';
 
 config();
 
@@ -19,8 +21,9 @@ app.use(express.static('public'));
 app.use(cors());
 app.use(helmet());
 
-setupDatabase().catch(err => console.error("Error in main flow: ", err.stack));
+schedule.scheduleJob('0 0 * * *', cleanupExpiredTokens); // Runs daily at midnight
 
+app.use('/api/database', databaseRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/exams', examsRouter);
 

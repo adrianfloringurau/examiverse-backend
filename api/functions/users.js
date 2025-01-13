@@ -1,40 +1,46 @@
 import User from '../../utils/databaseService/models/User.js';
 import bcrypt from 'bcrypt';
 import { validate as isUUID } from 'uuid';
-import jwt from 'jsonwebtoken';
+import { generateAccessToken, generateRefreshToken } from '../../utils/utils.js';
 import { config } from 'dotenv';
+import Token from '../../utils/databaseService/models/Token.js';
 
 config();
 
 async function login(username, password) {
     try {
-        const existingUser = await User.findOne({ where: { username }});
+        const existingUser = await User.findOne({ where: { username } });
         if (!existingUser) return -1;
 
-        const hashedPassword = await bcrypt.hash(password, existingUser.salt);
+        const isPasswordValid = await bcrypt.compare(password, existingUser.password);
+        if (!isPasswordValid) return 0;
 
-        if (hashedPassword != existingUser.password) return 0;
-
-        const token = jwt.sign(
-        {
-            id: existingUser.id,
-            username: existingUser.username,
-        },
-        process.env.SECRET_KEY,
-        {
-            expiresIn: '1h'
-        });
+        const accessToken = generateAccessToken(existingUser.id, existingUser.role);
+        const refreshToken = await generateRefreshToken(existingUser.id, existingUser.role);
 
         return {
             id: existingUser.id,
             username: existingUser.username,
-            token,
+            accessToken,
+            refreshToken,
         };
     } catch (err) {
-        console.error("Error checking user: ", err);
+        console.error("Error during login: ", err);
         return -2;
     }
 }
+
+async function logout(refreshToken) {
+    const token = await Token.findOne({ where: { refreshToken } });
+    if (token && token.active === true) {
+        await Token.update(
+            { active: false },
+            { where: { refreshToken } }
+        );
+        return true;
+    }
+    return false;
+};
 
 async function getUsers() {
     try {
@@ -44,6 +50,7 @@ async function getUsers() {
             result.push({
                 id: user.id,
                 username: user.username,
+                role: user.role,
             });
         }
         return result;
@@ -63,6 +70,7 @@ async function getUser(id) {
         if (user) return {
             id: user.id,
             username: user.username,
+            role: user.role,
         }
         return -2;
     } catch (err) {
@@ -71,12 +79,12 @@ async function getUser(id) {
     }
 }
 
-async function newUser(username, password) {
+async function newUser(username, password, role) {
     try {
         const existingUser = await User.findOne({ where: { username } });
         if (existingUser) return -1;
 
-        const saltRounds = process.env.SALT_ROUNDS || 10;
+        const saltRounds = Number(process.env.SALT_ROUNDS) || 10;
         const generatedSalt = await bcrypt.genSalt(saltRounds);
         const hashedPassword = await bcrypt.hash(password, generatedSalt);
 
@@ -84,6 +92,7 @@ async function newUser(username, password) {
             username,
             password: hashedPassword,
             salt: generatedSalt,
+            role,
         });
         return newUser;
     } catch (err) {
@@ -94,6 +103,7 @@ async function newUser(username, password) {
 
 export {
     login,
+    logout,
     getUsers,
     getUser,
     newUser,

@@ -20,6 +20,11 @@ const User = db.define("User", {
         type: Sequelize.TEXT,
         allowNull: false,
     },
+    role: {
+        type: Sequelize.ENUM('student', 'teacher', 'admin'),
+        allowNull: false,
+        defaultValue: 'student',
+    },
 });
 
 export default User;
