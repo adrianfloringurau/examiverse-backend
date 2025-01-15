@@ -1,15 +1,17 @@
 import express from 'express';
 import { login, logout, getUser, getUsers, newUser } from '../functions/users.js';
+import verifyToken from '../middleware/verifyToken.js';
+import { checkAdmin } from '../middleware/roleChecks.js';
 
 const usersRouter = express.Router();
 
-usersRouter.route('/').get(async (req, res) => {
+usersRouter.route('/').get(verifyToken, checkAdmin, async (req, res) => {
     const result = await getUsers();
     if (result === -1) return res.status(500).json({ error: "An error occurred while getting the users." });
     return res.status(200).json(result);
 });
 
-usersRouter.route('/:id').get(async (req, res) => {
+usersRouter.route('/:id').get(verifyToken, checkAdmin, async (req, res) => {
     const id = req.params.id;
     const result = await getUser(id);
     switch (result) {

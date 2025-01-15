@@ -7,7 +7,7 @@ function generateAccessToken(userId, userRole) {
         role: userRole,
     };
 
-    return `Bearer ${jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1m' })}`;
+    return `Bearer ${jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '5m' })}`;
 }
 
 async function generateRefreshToken(userId, userRole) {

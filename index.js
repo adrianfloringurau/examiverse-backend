@@ -7,6 +7,8 @@ import helmet from 'helmet';
 import { config } from 'dotenv';
 import { cleanupExpiredTokens } from './utils/utils.js';
 import schedule from 'node-schedule';
+import examGroupsRouter from './api/controllers/examGroups.js';
+import entriesRouter from './api/controllers/entries.js';
 
 config();
 
@@ -25,7 +27,9 @@ schedule.scheduleJob('0 0 * * *', cleanupExpiredTokens); // Runs daily at midnig
 
 app.use('/api/database', databaseRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/exam-groups', examGroupsRouter);
 app.use('/api/exams', examsRouter);
+app.use('/api/entries', entriesRouter);
 
 app.use((err, req, res, next) => {
     res.status(err.status || 500)

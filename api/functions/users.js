@@ -28,7 +28,7 @@ async function login(username, password) {
         console.error("Error during login: ", err);
         return -2;
     }
-}
+};
 
 async function logout(refreshToken) {
     const token = await Token.findOne({ where: { refreshToken } });
@@ -77,7 +77,7 @@ async function getUser(id) {
         console.error("Error getting user:", err);
         return -3;
     }
-}
+};
 
 async function newUser(username, password, role) {
     try {

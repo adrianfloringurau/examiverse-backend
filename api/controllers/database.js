@@ -1,7 +1,7 @@
 import express from 'express';
 import verifyToken from '../middleware/verifyToken.js';
 import db from '../../utils/databaseService/dbConfig.js';
-import checkAdmin from '../middleware/checkAdmin.js';
+import { checkAdmin } from '../middleware/roleChecks.js';
 
 const databaseRouter = express.Router();
 
