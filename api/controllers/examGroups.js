@@ -6,14 +6,18 @@ import { getExamGroup, getExamGroups, newExamGroup } from '../functions/examGrou
 const examGroupsRouter = express.Router();
 
 examGroupsRouter.route('/').get(verifyToken, async (req, res) => {
-    const result = await getExamGroups();
+    const role = req.user.role;
+    const userId = req.user.id;
+    const result = await getExamGroups(role, userId);
     if (result === -1) return res.status(500).json({ error: "An error occurred while getting the exam groups." });
     return res.status(200).json(result);
 });
 
 examGroupsRouter.route('/:id').get(verifyToken, async (req, res) => {
     const id = req.params.id;
-    const result = await getExamGroup(id);
+    const role = req.user.role;
+    const userId = req.user.id;
+    const result = await getExamGroup(id, role, userId);
     switch (result) {
         case -3: {
             return res.status(500).json({ error: "An error occurred while getting the exam group." });

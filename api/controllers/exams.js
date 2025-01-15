@@ -7,7 +7,9 @@ const examsRouter = express.Router();
 
 examsRouter.route('/:groupId').get(verifyToken, async (req, res) => {
     const groupId = req.params.groupId;
-    const result = await getExams(groupId);
+    const role = req.user.role;
+    const userId = req.user.id;
+    const result = await getExams(groupId, role, userId);
     switch (result) {
         case -3: {
             return res.status(500).json({ error: "An error occurred while getting the exams." });
@@ -27,7 +29,9 @@ examsRouter.route('/:groupId').get(verifyToken, async (req, res) => {
 examsRouter.route('/:groupId/:examId').get(verifyToken, async (req, res) => {
     const groupId = req.params.groupId;
     const examId = req.params.examId;
-    const result = await getExam(groupId, examId);
+    const role = req.user.role;
+    const userId = req.user.id;
+    const result = await getExam(groupId, examId, role, userId);
     switch (result) {
         case -5: {
             return res.status(500).json({ error: "An error occurred while getting the exam." });

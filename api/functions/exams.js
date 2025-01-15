@@ -35,13 +35,13 @@ async function newExam(userId, groupId, startTime, endTime, title, description, 
     }
 };
 
-async function getExams(groupId) {
+async function getExams(groupId, role, userId) {
     try {
         if (!isUUID(groupId)) {
             console.error("Invalid UUID:", groupId);
             return -1;
         }
-        const examGroup = await ExamGroup.findOne({ where: { id: groupId } });
+        const examGroup = (role === 'teacher') ? await ExamGroup.findOne({ where: { id: groupId, userId } }) : await ExamGroup.findOne({ where: { id: groupId } });
         if (!examGroup) return -2;
         const result = [];
         const exams = await Exam.findAll({ where: { groupId } });
@@ -62,7 +62,7 @@ async function getExams(groupId) {
     }
 };
 
-async function getExam(groupId, examId) {
+async function getExam(groupId, examId, role, userId) {
     try {
         if (!isUUID(groupId)) {
             console.error("Invalid UUID:", groupId);
@@ -72,7 +72,7 @@ async function getExam(groupId, examId) {
             console.error("Invalid UUID:", examId);
             return -2;
         }
-        const examGroup = await ExamGroup.findOne({ where: { id: groupId } });
+        const examGroup = (role === 'teacher') ? await ExamGroup.findOne({where: { id: groupId, userId } }) : await ExamGroup.findOne({ where: { id: groupId } });
         if (!examGroup) return -3;
         const exam = await Exam.findOne({ where: { id: examId, groupId }});
         if (!exam) return -4;
