@@ -28,6 +28,10 @@ const Entry = db.define("Entry", {
         },
         onDelete: 'CASCADE',
     },
+    signTime: {
+        type: Sequelize.DATE,
+        allowNull: false,
+    },
 });
 
 Entry.belongsTo(User, {

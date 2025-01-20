@@ -16,8 +16,6 @@ async function newExam(userId, groupId, startTime, endTime, title, description, 
         if (examGroup.userId !== userId) {
             return -3;
         }
-        startTime = new Date();
-        endTime = new Date() + 1;
         if (startTime >= endTime) {
             return -4;
         }

@@ -11,6 +11,12 @@ entriesRouter.route('/sign/:examId').post(verifyToken, checkStudent, async (req,
     const { password } = req.query;
     const result = await signExam(userId, examId, password);
     switch (result) {
+        case -8: {
+            return res.status(403).json({ error: "Exam is closed." });
+        };
+        case -7: {
+            return res.status(403).json({ error: "Exam is not opened yet." });
+        };
         case -6: {
             return res.status(500).json({ error: "An error occurred while creating the entry." });
         };

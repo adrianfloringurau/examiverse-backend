@@ -14,9 +14,13 @@ async function signExam(userId, examId, password) {
         if (password !== exam.password) return -4;
         const existentEntry = await Entry.findOne({ where: { userId, examId }});
         if (existentEntry) return -5;
+        const currentDate = new Date();
+        if (currentDate < exam.startTime) return -7;
+        if (currentDate > exam.endTime) return -8;
         const newEntry = await Entry.create({
             userId,
             examId,
+            signTime: currentDate,
         });
         return newEntry;
     } catch (err) {
