@@ -1,6 +1,7 @@
 import ExamGroup from "../../utils/databaseService/models/ExamGroup.js";
 import Exam from "../../utils/databaseService/models/Exam.js";
 import { validate as isUUID } from 'uuid';
+import { codifyRole } from "../../utils/utils.js";
 
 async function newExam(userId, groupId, startTime, endTime, title, description, password) {
     try {
@@ -83,6 +84,7 @@ async function getExam(groupId, examId, role, userId) {
             endTime: exam.endTime,
             title: exam.title,
             description: exam.description,
+            isEditor: codifyRole(role),
         };
         return result;
     } catch (err) {

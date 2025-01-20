@@ -1,7 +1,8 @@
 import express from 'express';
 import verifyToken from '../middleware/verifyToken.js';
 import { getExam, getExamPassword, getExams, newExam } from '../functions/exams.js';
-import { checkTeacher } from '../middleware/roleChecks.js';
+import { checkTeacher, checkTeacherOrAdmin } from '../middleware/roleChecks.js';
+import generateExcel from '../../utils/excelService/generateExcel.js';
 
 const examsRouter = express.Router();
 
@@ -32,6 +33,33 @@ examsRouter.route('/:groupId/:examId').get(verifyToken, async (req, res) => {
     const role = req.user.role;
     const userId = req.user.id;
     const result = await getExam(groupId, examId, role, userId);
+    switch (result) {
+        case -5: {
+            return res.status(500).json({ error: "An error occurred while getting the exam." });
+        };
+        case -4: {
+            return res.status(404).json({ error: "Exam does not exist." });
+        };
+        case -3: {
+            return res.status(404).json({ error: "Exam group does not exist." });
+        };
+        case -2: {
+            return res.status(400).json({ error: "Invalid UUID." });
+        };
+        case -1: {
+            return res.status(400).json({ error: "Invalid UUID." });
+        };
+        default: {
+            return res.status(200).json(result);
+        };
+    }
+});
+
+examsRouter.route('/:groupId/:examId/excel').get(verifyToken, checkTeacherOrAdmin, async (req, res) => {
+    const groupId = req.params.groupId;
+    const examId = req.params.examId;
+    const userId = req.user.id;
+    const result = await generateExcel(groupId, examId, userId);
     switch (result) {
         case -5: {
             return res.status(500).json({ error: "An error occurred while getting the exam." });

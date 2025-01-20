@@ -78,6 +78,10 @@ async function cleanupExpiredTokens() {
     }
 };
 
+function codifyRole(userRole) {
+    if (userRole === 'teacher' || userRole === 'admin') return true;
+    return false;
+}
 
 export {
     generateAccessToken,
@@ -85,4 +89,5 @@ export {
     validateRefreshToken,
     extendTokenExpiration,
     cleanupExpiredTokens,
+    codifyRole,
 }

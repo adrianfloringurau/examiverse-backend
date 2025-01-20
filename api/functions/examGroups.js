@@ -1,5 +1,6 @@
 import ExamGroup from "../../utils/databaseService/models/ExamGroup.js";
 import { validate as isUUID } from 'uuid';
+import { codifyRole } from "../../utils/utils.js";
 
 async function newExamGroup(userId, title, description) {
     try {
@@ -20,10 +21,13 @@ async function newExamGroup(userId, title, description) {
 
 async function getExamGroups(role, userId) {
     try {
-        const result = [];
+        const result = {
+            isEditor: codifyRole(role),
+            data: [],
+        };
         const examGroups = (role === 'teacher') ? await ExamGroup.findAll({ where: { userId } }) : await ExamGroup.findAll();
         for (let examGroup of examGroups) {
-            result.push({
+            result.data.push({
                 examGroup
             });
         }
@@ -41,7 +45,13 @@ async function getExamGroup(id, role, userId) {
             return -1;
         }
         const examGroup = (role === 'teacher') ? await ExamGroup.findOne({ where: { id, userId }}) : await ExamGroup.findOne({ where: { id } });
-        if (examGroup) return examGroup;
+        if (examGroup) {
+            const result = {
+                isEditor : codifyRole(role),
+                data: examGroup,
+            }
+            return result;
+        }
         return -2;
     } catch (err) {
         console.error("Error getting exam group:", err);
