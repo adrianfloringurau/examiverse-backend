@@ -7,7 +7,7 @@ function generateAccessToken(userId, userRole) {
         role: userRole,
     };
 
-    return `Bearer ${jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '5m' })}`;
+    return `Bearer ${jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '20m' })}`;
 }
 
 async function generateRefreshToken(userId, userRole) {
@@ -32,7 +32,7 @@ async function generateRefreshToken(userId, userRole) {
 
 async function validateRefreshToken(refreshToken) {
     const tokenRecord = await Token.findOne({ where: { refreshToken, active: true } });
-    if (!tokenRecord || new Date() > tokenRecord.expiresAt) {
+    if (!tokenRecord || new Date() > new Date(tokenRecord.expiresAt)) {
         throw new Error('Invalid or expired refresh token');
     }
 };

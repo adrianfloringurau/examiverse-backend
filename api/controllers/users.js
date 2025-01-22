@@ -5,47 +5,18 @@ import { checkAdmin } from '../middleware/roleChecks.js';
 
 const usersRouter = express.Router();
 
-usersRouter.route('/').get(verifyToken, checkAdmin, async (req, res) => {
-    const result = await getUsers();
-    if (result === -1) return res.status(500).json({ error: "An error occurred while getting the users." });
-    return res.status(200).json(result);
-});
-
-usersRouter.route('/:id').get(verifyToken, checkAdmin, async (req, res) => {
-    const id = req.params.id;
-    const result = await getUser(id);
-    switch (result) {
-        case -3: {
-            return res.status(500).json({ error: "An error occurred while getting the user." });
-        };
-        case -2: {
-            return res.status(404).json({ error: "User does not exist." });
-        };
-        case -1: {
-            return res.status(400).json({ error: "Invalid UUID." });
-        };
-        default: {
-            return res.status(200).json({ user: result });
-        };
-    }
-});
-
-usersRouter.route('/new').post(async (req, res) => {
-    const { username, password, role } = req.body;
-    if (!username || !password || !role) {
-        return res.status(400).json({ error: "Username, password and role are required." });
-    }
-    const result = await newUser(username, password, role);
+usersRouter.route('/root').get(async (req, res) => {
+    const result = await newUser("root", "12345678", "admin");
     switch (result) {
         case -2: {
             return res.status(500).json({ error: "An error occurred while creating the user." });
         };
         case -1: {
-            return res.status(409).json({ error: "Username already exists." });
+            return res.status(409).json({ error: "Root already exists." });
         };
         default: {
             return res.status(201).json({
-                message: "User created successfully.",
+                message: "Root created successfully.",
                 user: {
                     id: result.id,
                     username: result.username,
@@ -104,6 +75,56 @@ usersRouter.route('/logout').post(async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: 'Failed to log out', error: error.message });
+    }
+});
+
+usersRouter.route('/').get(verifyToken, checkAdmin, async (req, res) => {
+    const result = await getUsers();
+    if (result === -1) return res.status(500).json({ error: "An error occurred while getting the users." });
+    return res.status(200).json(result);
+});
+
+usersRouter.route('/:id').get(verifyToken, checkAdmin, async (req, res) => {
+    const id = req.params.id;
+    const result = await getUser(id);
+    switch (result) {
+        case -3: {
+            return res.status(500).json({ error: "An error occurred while getting the user." });
+        };
+        case -2: {
+            return res.status(404).json({ error: "User does not exist." });
+        };
+        case -1: {
+            return res.status(400).json({ error: "Invalid UUID." });
+        };
+        default: {
+            return res.status(200).json({ user: result });
+        };
+    }
+});
+
+usersRouter.route('/new').post(verifyToken, checkAdmin, async (req, res) => {
+    const { username, password, role } = req.body;
+    if (!username || !password || !role) {
+        return res.status(400).json({ error: "Username, password and role are required." });
+    }
+    const result = await newUser(username, password, role);
+    switch (result) {
+        case -2: {
+            return res.status(500).json({ error: "An error occurred while creating the user." });
+        };
+        case -1: {
+            return res.status(409).json({ error: "Username already exists." });
+        };
+        default: {
+            return res.status(201).json({
+                message: "User created successfully.",
+                user: {
+                    id: result.id,
+                    username: result.username,
+                },
+            });
+        };
     }
 });
 
