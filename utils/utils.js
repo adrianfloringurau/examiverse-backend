@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import Token from './databaseService/models/Token.js';
+import { Sequelize } from 'sequelize';
 
 function generateAccessToken(userId, userRole) {
     const payload = {
@@ -35,6 +36,7 @@ async function validateRefreshToken(refreshToken) {
     if (!tokenRecord || new Date() > new Date(tokenRecord.expiresAt)) {
         throw new Error('Invalid or expired refresh token');
     }
+    console.log("aSDAS")
 };
 
 async function extendTokenExpiration(refreshToken) {

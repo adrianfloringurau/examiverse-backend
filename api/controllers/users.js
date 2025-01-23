@@ -1,5 +1,5 @@
 import express from 'express';
-import { login, logout, getUser, getUsers, newUser } from '../functions/users.js';
+import { login, logout, getUser, getUsers, newUser, changePassword } from '../functions/users.js';
 import verifyToken from '../middleware/verifyToken.js';
 import { checkAdmin } from '../middleware/roleChecks.js';
 
@@ -50,6 +50,7 @@ usersRouter.route('/login').post(async (req, res) => {
                     user: {
                         id: result.id,
                         username: result.username,
+                        role: result.role,
                     },
                     accessToken: result.accessToken,
                     refreshToken: result.refreshToken,
@@ -75,6 +76,29 @@ usersRouter.route('/logout').post(async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: 'Failed to log out', error: error.message });
+    }
+});
+
+usersRouter.route('/change-password').post(verifyToken, async (req, res) => {
+    const userId = req.user.id;
+    const { oldPassword, newPassword } = req.body;
+    const result = await changePassword(userId, oldPassword, newPassword);
+    switch (result) {
+        case -4: {
+            return res.status(500).json({ error: "An error occurred while changing the password." });
+        };
+        case -3: {
+            return res.status(403).json({ error: "Wrong password." });
+        };
+        case -2: {
+            return res.status(404).json({ error: "User does not exist." });
+        };
+        case -1: {
+            return res.status(400).json({ error: "New password must be different from the old one." });
+        };
+        default: {
+            return res.status(200).json({ user: result });
+        };
     }
 });
 

@@ -21,6 +21,7 @@ async function login(username, password) {
         return {
             id: existingUser.id,
             username: existingUser.username,
+            role: existingUser.role,
             accessToken,
             refreshToken,
         };
@@ -41,6 +42,25 @@ async function logout(refreshToken) {
     }
     return false;
 };
+
+async function changePassword(userId, oldPassword, newPassword) {
+    try {
+        if (oldPassword === newPassword) return -1;
+        const user = await User.findOne({ where: { id: userId } });
+        if (!user) return -2;
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return -3;
+        }
+        const newHashedPassword = await bcrypt.hash(newPassword, user.salt);
+        user.password = newHashedPassword;
+        await user.save();
+        return user;
+    } catch (err) {
+        console.error("Error changing password: ", err);
+        return -4;
+    }
+}
 
 async function getUsers() {
     try {
@@ -104,6 +124,7 @@ async function newUser(username, password, role) {
 export {
     login,
     logout,
+    changePassword,
     getUsers,
     getUser,
     newUser,
